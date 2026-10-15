@@ -10,6 +10,7 @@ import {
 } from '@milkdown/utils'
 
 import { withMeta } from '../__internal__'
+import { remarkGFMPlugin } from '../plugin/remark-gfm-plugin'
 
 /// HTML attributes for the strikethrough mark.
 export const strikethroughAttr = $markAttr('strike_through')
@@ -68,10 +69,14 @@ withMeta(toggleStrikethroughCommand, {
   group: 'Strikethrough',
 })
 
-/// Input rule to create the strikethrough mark.
+/// Input rule to create the strikethrough mark. With remark-gfm's
+/// `singleTilde: false` it takes two tildes, as the Markdown is then read.
 export const strikethroughInputRule = $inputRule((ctx) => {
+  const single = ctx.get(remarkGFMPlugin.options.key)?.singleTilde !== false
   return markRule(
-    /(?<![\w:/])(~{1,2})(.+?)\1(?!\w|\/)$/,
+    single
+      ? /(?<![\w:/])(~{1,2})(.+?)\1(?!\w|\/)$/
+      : /(?<![\w:/~])(~~)([^~].*?)\1(?!\w|\/)$/,
     strikethroughSchema.type(ctx)
   )
 })
