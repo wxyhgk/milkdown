@@ -1,6 +1,7 @@
 import type { MilkdownPlugin } from '@milkdown/ctx'
 
 import {
+  fencedBlockSyncPlugin,
   hardbreakClearMarkPlugin,
   hardbreakFilterNodes,
   hardbreakFilterPlugin,
@@ -36,4 +37,5 @@ export const plugins: MilkdownPlugin[] = [
 
   syncHeadingIdPlugin,
   syncListOrderPlugin,
+  fencedBlockSyncPlugin,
 ].flat()

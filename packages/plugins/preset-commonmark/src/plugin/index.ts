@@ -12,5 +12,6 @@ export * from './hardbreak-filter-plugin'
 
 export * from './sync-heading-id-plugin'
 export * from './sync-list-order-plugin'
+export * from './fenced-block-sync-plugin'
 export * from './remark-preserve-syntax-plugin'
 export * from './remark-minimal-escape-plugin'

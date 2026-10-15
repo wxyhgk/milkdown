@@ -18,6 +18,7 @@ import {
   codeBlockAttr,
   codeBlockSchema,
   docSchema,
+  fencedBlocksCtx,
   hardbreakAttr,
   hardbreakSchema,
   headingAttr,
@@ -55,6 +56,7 @@ export const schema: MilkdownPlugin[] = [
   blockquoteAttr,
   blockquoteSchema,
 
+  fencedBlocksCtx,
   codeBlockAttr,
   codeBlockSchema,
 

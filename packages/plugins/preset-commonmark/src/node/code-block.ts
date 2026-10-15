@@ -11,6 +11,7 @@ import {
 } from '@milkdown/utils'
 
 import { withMeta } from '../__internal__'
+import { fenceAttrs, fencedNodeOf, readFence, writeFence } from './fence'
 
 /// HTML attributes for code block node.
 export const codeBlockAttr = $nodeAttr('codeBlock', () => ({
@@ -31,22 +32,7 @@ export const codeBlockSchema = $nodeSchema('code_block', (ctx) => {
     marks: '',
     defining: true,
     code: true,
-    attrs: {
-      language: {
-        default: '',
-        validate: 'string',
-      },
-      /// What follows the language on the fence line (`title="a.py"`).
-      meta: {
-        default: '',
-        validate: 'string',
-      },
-      /// How the author fenced it: `` ` ``, `~`, or `indent`; empty for the default.
-      fence: {
-        default: '',
-        validate: 'string',
-      },
-    },
+    attrs: fenceAttrs,
     parseDOM: [
       {
         tag: 'pre',
@@ -76,29 +62,15 @@ export const codeBlockSchema = $nodeSchema('code_block', (ctx) => {
       ]
     },
     parseMarkdown: {
-      match: ({ type }) => type === 'code',
-      runner: (state, node, type) => {
-        const language = node.lang ?? ''
-        const value = node.value as string | null
-        state.openNode(type, {
-          language,
-          meta: (node.meta as string | null) ?? '',
-          fence: (node.fence as string | undefined) ?? '',
-        })
-        if (value) state.addText(value)
-
-        state.closeNode()
-      },
+      // A fence whose language another node claims is that node's.
+      match: (node) =>
+        node.type === 'code' &&
+        fencedNodeOf(ctx, (node.lang as string | null) ?? '') === 'code_block',
+      runner: readFence,
     },
     toMarkdown: {
       match: (node) => node.type.name === 'code_block',
-      runner: (state, node) => {
-        state.addNode('code', undefined, node.content.firstChild?.text || '', {
-          lang: node.attrs.language,
-          ...(node.attrs.meta ? { meta: node.attrs.meta } : {}),
-          ...(node.attrs.fence ? { fence: node.attrs.fence } : {}),
-        })
-      },
+      runner: writeFence,
     },
   }
 })
@@ -117,7 +89,7 @@ withMeta(codeBlockSchema.ctx, {
 /// For example, ` ```javascript ` will create a code block with language javascript.
 export const createCodeBlockInputRule = $inputRule((ctx) =>
   textblockTypeInputRule(
-    /^```(?<language>[a-z]*)?[\s\n]$/,
+    /^```(?<language>[^\s`]*)?[\s\n]$/,
     codeBlockSchema.type(ctx),
     (match) => ({
       language: match.groups?.language ?? '',
