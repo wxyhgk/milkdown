@@ -16,6 +16,7 @@ import { createApp, type App } from 'vue'
 import type { BlockEditFeatureConfig } from '../index'
 
 import { menuIcon, plusIcon } from '../../../icons'
+import { blockMenuAPI } from '../block-menu'
 import { menuAPI } from '../menu'
 import { BlockHandle } from './component'
 
@@ -31,6 +32,7 @@ class BlockHandleView implements PluginView {
     content.classList.add('milkdown-block-handle')
     const app = createApp(BlockHandle, {
       onAdd: this.onAdd,
+      onMenu: this.onMenu,
       addIcon: config?.handleAddIcon ?? plusIcon,
       handleIcon: config?.handleDragIcon ?? menuIcon,
     })
@@ -81,6 +83,12 @@ class BlockHandleView implements PluginView {
     this.#provider.destroy()
     this.#content.remove()
     this.#app.unmount()
+  }
+
+  onMenu = (anchor: HTMLElement) => {
+    const active = this.#provider.active
+    if (!active) return
+    this.#ctx.get(blockMenuAPI.key).toggle(active.$pos.pos, anchor)
   }
 
   onAdd = () => {

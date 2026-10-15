@@ -5,10 +5,12 @@ import { block, type BlockProviderOptions } from '@milkdown/kit/plugin/block'
 import type { DeepPartial } from '../../utils'
 import type { GroupBuilder } from '../../utils/group-builder'
 import type { DefineFeature } from '../shared'
+import type { BuildBlockMenu } from './block-menu'
 import type { SlashMenuItem } from './menu/utils'
 
 import { crepeFeatureConfig } from '../../core/slice'
 import { CrepeFeature } from '../index'
+import { blockMenu, blockMenuAPI, blockMenuConfig } from './block-menu'
 import { configureBlockHandle } from './handle'
 import { configureMenu, menu, menuAPI } from './menu'
 
@@ -16,6 +18,10 @@ interface BlockEditConfig {
   handleAddIcon: string
   handleDragIcon: string
   buildMenu: (builder: GroupBuilder<SlashMenuItem>) => void
+  /// The menu a click on the drag handle opens for its block (a drag still
+  /// moves the block). Without it the handle only drags. `blockMenuAPI`
+  /// opens the same menu from elsewhere.
+  buildBlockMenu: BuildBlockMenu
 
   blockHandle: Pick<
     BlockProviderOptions,
@@ -112,6 +118,13 @@ interface BlockEditConfig {
 
 export type BlockEditFeatureConfig = DeepPartial<BlockEditConfig>
 
+export { blockMenuAPI } from './block-menu'
+export type {
+  BlockMenuItem,
+  BlockMenuTarget,
+  BuildBlockMenu,
+} from './block-menu'
+
 export const blockEdit: DefineFeature<BlockEditFeatureConfig> = (
   editor,
   config
@@ -120,7 +133,15 @@ export const blockEdit: DefineFeature<BlockEditFeatureConfig> = (
     .config(crepeFeatureConfig(CrepeFeature.BlockEdit))
     .config((ctx) => configureBlockHandle(ctx, config))
     .config((ctx) => configureMenu(ctx, config))
+    .config((ctx) =>
+      ctx.set(blockMenuConfig.key, {
+        build: (config?.buildBlockMenu as BuildBlockMenu | undefined) ?? null,
+      })
+    )
     .use(menuAPI)
+    .use(blockMenuConfig)
+    .use(blockMenuAPI)
+    .use(blockMenu)
     .use(block)
     .use(menu)
 }

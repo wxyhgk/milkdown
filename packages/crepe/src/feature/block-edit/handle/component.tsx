@@ -7,6 +7,8 @@ keepAlive(h, Fragment)
 
 interface BlockHandleProps {
   onAdd: () => void
+  /// A click on the drag handle, not a drag.
+  onMenu: (anchor: HTMLElement) => void
   addIcon: string
   handleIcon: string
 }
@@ -14,6 +16,10 @@ interface BlockHandleProps {
 export const BlockHandle = defineComponent<BlockHandleProps>({
   props: {
     onAdd: {
+      type: Function,
+      required: true,
+    },
+    onMenu: {
       type: Function,
       required: true,
     },
@@ -28,6 +34,7 @@ export const BlockHandle = defineComponent<BlockHandleProps>({
   },
   setup(props) {
     const addButton = ref<HTMLDivElement>()
+    let press: { x: number; y: number } | null = null
 
     return () => {
       return (
@@ -49,7 +56,21 @@ export const BlockHandle = defineComponent<BlockHandleProps>({
           >
             <Icon icon={props.addIcon} />
           </div>
-          <div class="operation-item">
+          <div
+            class="operation-item"
+            onPointerdown={(e) => {
+              press = { x: e.clientX, y: e.clientY }
+            }}
+            onPointerup={(e) => {
+              const start = press
+              press = null
+              if (!start) return
+              // A drag moves the block; only a still click opens the menu.
+              if (Math.hypot(e.clientX - start.x, e.clientY - start.y) > 4)
+                return
+              props.onMenu(e.currentTarget as HTMLElement)
+            }}
+          >
             <Icon icon={props.handleIcon} />
           </div>
         </>
