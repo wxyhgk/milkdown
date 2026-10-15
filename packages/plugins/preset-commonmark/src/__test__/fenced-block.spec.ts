@@ -85,3 +85,22 @@ describe('$fencedBlock', () => {
     expect(blocks(editor)).toEqual(['code_block:sdf-3d'])
   })
 })
+
+describe('copy and paste', () => {
+  it('a code block keeps its language, meta and fence through the DOM', async () => {
+    const { DOMParser, DOMSerializer } = await import('@milkdown/prose/model')
+    const editor = await createEditor(
+      '~~~python title="a.py"\nx\n~~~\n',
+      molecule
+    )
+    const { schema, doc } = view(editor).state
+    const dom = document.createElement('div')
+    dom.append(DOMSerializer.fromSchema(schema).serializeFragment(doc.content))
+    const parsed = DOMParser.fromSchema(schema).parse(dom)
+    expect(parsed.firstChild!.attrs).toEqual({
+      language: 'python',
+      meta: 'title="a.py"',
+      fence: '~',
+    })
+  })
+})

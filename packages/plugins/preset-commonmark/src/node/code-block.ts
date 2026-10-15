@@ -11,7 +11,14 @@ import {
 } from '@milkdown/utils'
 
 import { withMeta } from '../__internal__'
-import { fenceAttrs, fencedNodeOf, readFence, writeFence } from './fence'
+import {
+  fenceAttrs,
+  fenceFromDOM,
+  fenceToDOM,
+  fencedNodeOf,
+  readFence,
+  writeFence,
+} from './fence'
 
 /// HTML attributes for code block node.
 export const codeBlockAttr = $nodeAttr('codeBlock', () => ({
@@ -40,23 +47,18 @@ export const codeBlockSchema = $nodeSchema('code_block', (ctx) => {
         getAttrs: (dom) => {
           if (!(dom instanceof HTMLElement)) throw expectDomTypeError(dom)
 
-          return { language: dom.dataset.language }
+          return fenceFromDOM(dom)
         },
       },
     ],
     toDOM: (node) => {
       const attr = ctx.get(codeBlockAttr.key)(node)
-      const language = node.attrs.language
-      const languageAttrs =
-        language && language.length > 0
-          ? { 'data-language': language }
-          : undefined
 
       return [
         'pre',
         {
           ...attr.pre,
-          ...languageAttrs,
+          ...fenceToDOM(node),
         },
         ['code', attr.code, 0],
       ]

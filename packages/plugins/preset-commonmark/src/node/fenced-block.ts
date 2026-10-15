@@ -6,6 +6,8 @@ import { $nodeSchema } from '@milkdown/utils'
 
 import {
   fenceAttrs,
+  fenceFromDOM,
+  fenceToDOM,
   fencedBlocksCtx,
   fencedNodeOf,
   readFence,
@@ -57,14 +59,12 @@ export function $fencedBlock<T extends string>(
       {
         tag: `pre[data-fenced-block="${id}"]`,
         preserveWhitespace: 'full',
-        getAttrs: (dom) => ({
-          language: (dom as HTMLElement).dataset.language ?? '',
-        }),
+        getAttrs: (dom) => fenceFromDOM(dom as HTMLElement),
       },
     ],
     toDOM: (node) => [
       'pre',
-      { 'data-fenced-block': id, 'data-language': node.attrs.language },
+      { 'data-fenced-block': id, ...fenceToDOM(node) },
       ['code', 0],
     ],
     ...spec(ctx),

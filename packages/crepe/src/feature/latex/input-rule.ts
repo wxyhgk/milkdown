@@ -3,6 +3,7 @@ import { nodeRule } from '@milkdown/kit/prose'
 import { textblockTypeInputRule } from '@milkdown/kit/prose/inputrules'
 import { $inputRule } from '@milkdown/kit/utils'
 
+import { mathBlockAttrs } from './constants'
 import { mathInlineSchema } from './inline-latex'
 
 /// Input rule for inline math.
@@ -18,9 +19,11 @@ export const mathInlineInputRule = $inputRule((ctx) =>
 )
 
 /// A input rule for creating block math.
-/// For example, `$$ ` will create a code block with language javascript.
+/// For example, `$$ ` will create a block of math: a LaTeX code block written as `$$`.
 export const mathBlockInputRule = $inputRule((ctx) =>
-  textblockTypeInputRule(/^\$\$[\s\n]$/, codeBlockSchema.type(ctx), () => ({
-    language: 'LaTeX',
-  }))
+  textblockTypeInputRule(
+    /^\$\$[\s\n]$/,
+    codeBlockSchema.type(ctx),
+    () => mathBlockAttrs
+  )
 )

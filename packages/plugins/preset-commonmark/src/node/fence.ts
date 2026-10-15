@@ -56,6 +56,24 @@ export const fenceAttrs = {
   },
 } as const
 
+/// A fenced node's attrs as `data-` attributes, so copy and paste keep them.
+export function fenceToDOM(node: Node): Record<string, string> {
+  const dom: Record<string, string> = {}
+  if (node.attrs.language) dom['data-language'] = node.attrs.language
+  if (node.attrs.meta) dom['data-meta'] = node.attrs.meta
+  if (node.attrs.fence) dom['data-fence'] = node.attrs.fence
+  return dom
+}
+
+/// A fenced node's attrs read back from what `fenceToDOM` wrote.
+export function fenceFromDOM(dom: HTMLElement) {
+  return {
+    language: dom.dataset.language ?? '',
+    meta: dom.dataset.meta ?? '',
+    fence: dom.dataset.fence ?? '',
+  }
+}
+
 /// Opens a fenced node from an mdast `code` node.
 export function readFence(
   state: ParserState,

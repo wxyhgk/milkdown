@@ -16,9 +16,15 @@ import { LatexInlineTooltip } from './inline-tooltip/view'
 import { mathBlockInputRule, mathInlineInputRule } from './input-rule'
 import { remarkMathBlockPlugin, remarkMathPlugin } from './remark'
 
+export { MATH_BLOCK_FENCE, mathBlockAttrs } from './constants'
+
 export interface LatexConfig {
   katexOptions: KatexOptions
   inlineEditConfirm: string
+  /// Draw a LaTeX code block's preview as a formula. Turn it off when a node
+  /// view of your own draws blocks of math, so a ```latex fence previews as
+  /// the code it is. On by default.
+  blockPreview: boolean
 }
 
 export type LatexFeatureConfig = Partial<LatexConfig>
@@ -33,16 +39,17 @@ export const latex: DefineFeature<LatexFeatureConfig> = (editor, config) => {
         throw new Error('You need to enable CodeMirror to use LaTeX feature')
       }
 
-      ctx.update(codeBlockConfig.key, (prev) => ({
-        ...prev,
-        renderPreview: (language, content, applyPreview) => {
-          if (language.toLowerCase() === 'latex' && content.length > 0) {
-            return renderLatex(content, config?.katexOptions)
-          }
-          const renderPreview = prev.renderPreview
-          return renderPreview(language, content, applyPreview)
-        },
-      }))
+      if (config?.blockPreview !== false)
+        ctx.update(codeBlockConfig.key, (prev) => ({
+          ...prev,
+          renderPreview: (language, content, applyPreview) => {
+            if (language.toLowerCase() === 'latex' && content.length > 0) {
+              return renderLatex(content, config?.katexOptions)
+            }
+            const renderPreview = prev.renderPreview
+            return renderPreview(language, content, applyPreview)
+          },
+        }))
 
       ctx.set(inlineLatexTooltip.key, {
         view: (view) => {

@@ -4,6 +4,8 @@ import { $remark } from '@milkdown/kit/utils'
 import remarkMath from 'remark-math'
 import { visit } from 'unist-util-visit'
 
+import { MATH_BLOCK_FENCE } from './constants'
+
 export const remarkMathPlugin = $remark<'remarkMath', undefined>(
   'remarkMath',
   () => remarkMath
@@ -18,10 +20,13 @@ function visitMathBlock(ast: Node) {
       index: number,
       parent: Node & { children: Node[] }
     ) => {
-      const { value } = node as Node & { value: string }
+      const { value, meta } = node as Node & { value: string; meta?: string }
       const newNode = {
         type: 'code',
         lang: 'LaTeX',
+        meta,
+        // Written back as `$$`, unlike a ```latex fence.
+        fence: MATH_BLOCK_FENCE,
         value,
       }
       parent.children.splice(index, 1, newNode)
@@ -29,7 +34,7 @@ function visitMathBlock(ast: Node) {
   )
 }
 
-/// Turn math block into code block with language LaTeX.
+/// Turn math block into code block with language LaTeX, fenced with `$$`.
 export const remarkMathBlockPlugin = $remark(
   'remarkMathBlock',
   () => () => visitMathBlock

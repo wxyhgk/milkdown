@@ -43,6 +43,7 @@ import {
   todoListIcon,
 } from '../../../icons'
 import { GroupBuilder, type MenuItemGroup } from '../../../utils/group-builder'
+import { mathBlockAttrs } from '../../latex/constants'
 
 export function getGroups(
   filter?: string,
@@ -350,7 +351,7 @@ export function getGroups(
           commands.call(clearTextInCurrentBlockCommand.key)
           commands.call(addBlockTypeCommand.key, {
             nodeType: codeBlock,
-            attrs: { language: 'LaTeX' },
+            attrs: mathBlockAttrs,
           })
         },
       })
