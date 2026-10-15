@@ -860,6 +860,9 @@ importers:
       '@milkdown/utils':
         specifier: workspace:*
         version: link:../../utils
+      mdast-util-to-markdown:
+        specifier: ^2.1.2
+        version: 2.1.2
       remark-inline-links:
         specifier: ^7.0.0
         version: 7.0.0
@@ -893,6 +896,12 @@ importers:
       '@milkdown/utils':
         specifier: workspace:*
         version: link:../../utils
+      mdast-util-gfm-table:
+        specifier: ^2.0.0
+        version: 2.0.0(supports-color@7.2.0)
+      mdast-util-to-markdown:
+        specifier: ^2.1.2
+        version: 2.1.2
       prosemirror-safari-ime-span:
         specifier: ^1.0.1
         version: 1.0.2

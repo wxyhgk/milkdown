@@ -60,6 +60,11 @@ export const headingSchema = $nodeSchema('heading', (ctx) => {
         default: 1,
         validate: 'number',
       },
+      /// True when the author underlined the heading (`===`, `---`).
+      setext: {
+        default: false,
+        validate: 'boolean',
+      },
     },
     parseDOM: headingIndex.map((x) => ({
       tag: `h${x}`,
@@ -83,7 +88,7 @@ export const headingSchema = $nodeSchema('heading', (ctx) => {
       match: ({ type }) => type === 'heading',
       runner: (state, node, type) => {
         const depth = node.depth as number
-        state.openNode(type, { level: depth })
+        state.openNode(type, { level: depth, setext: Boolean(node.setext) })
         state.next(node.children)
         state.closeNode()
       },
@@ -91,7 +96,10 @@ export const headingSchema = $nodeSchema('heading', (ctx) => {
     toMarkdown: {
       match: (node) => node.type.name === 'heading',
       runner: (state, node) => {
-        state.openNode('heading', undefined, { depth: node.attrs.level })
+        state.openNode('heading', undefined, {
+          depth: node.attrs.level,
+          ...(node.attrs.setext ? { setext: true } : {}),
+        })
         serializeText(state, node)
         state.closeNode()
       },

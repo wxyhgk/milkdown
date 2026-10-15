@@ -10,7 +10,9 @@ import {
   remarkInlineLinkPlugin,
   remarkLineBreak,
   remarkMarker,
+  remarkMinimalEscape,
   remarkPreserveEmptyLinePlugin,
+  remarkPreserveSyntax,
   syncHeadingIdPlugin,
   syncListOrderPlugin,
 } from '../plugin'
@@ -29,6 +31,8 @@ export const plugins: MilkdownPlugin[] = [
   remarkHtmlTransformer,
   remarkMarker,
   remarkPreserveEmptyLinePlugin,
+  remarkPreserveSyntax,
+  remarkMinimalEscape,
 
   syncHeadingIdPlugin,
   syncListOrderPlugin,

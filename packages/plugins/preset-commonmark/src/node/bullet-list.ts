@@ -30,6 +30,11 @@ export const bulletListSchema = $nodeSchema('bullet_list', (ctx) => {
         default: false,
         validate: 'boolean',
       },
+      /// The bullet the author wrote (`-`, `*` or `+`); empty for the default.
+      bullet: {
+        default: '',
+        validate: 'string',
+      },
     },
     parseDOM: [
       {
@@ -39,6 +44,7 @@ export const bulletListSchema = $nodeSchema('bullet_list', (ctx) => {
 
           return {
             spread: dom.dataset.spread === 'true',
+            bullet: dom.dataset.bullet ?? '',
           }
         },
       },
@@ -49,6 +55,7 @@ export const bulletListSchema = $nodeSchema('bullet_list', (ctx) => {
         {
           ...ctx.get(bulletListAttr.key)(node),
           'data-spread': node.attrs.spread,
+          ...(node.attrs.bullet ? { 'data-bullet': node.attrs.bullet } : {}),
         },
         0,
       ]
@@ -57,7 +64,8 @@ export const bulletListSchema = $nodeSchema('bullet_list', (ctx) => {
       match: ({ type, ordered }) => type === 'list' && !ordered,
       runner: (state, node, type) => {
         const spread = node.spread ?? false
-        state.openNode(type, { spread }).next(node.children).closeNode()
+        const bullet = (node.bullet as string | undefined) ?? ''
+        state.openNode(type, { spread, bullet }).next(node.children).closeNode()
       },
     },
     toMarkdown: {
@@ -67,6 +75,7 @@ export const bulletListSchema = $nodeSchema('bullet_list', (ctx) => {
           .openNode('list', undefined, {
             ordered: false,
             spread: node.attrs.spread,
+            ...(node.attrs.bullet ? { bullet: node.attrs.bullet } : {}),
           })
           .next(node.content)
           .closeNode()
@@ -87,7 +96,9 @@ withMeta(bulletListSchema.ctx, {
 
 /// Input rule for wrapping a block in bullet list node.
 export const wrapInBulletListInputRule = $inputRule((ctx) =>
-  wrappingInputRule(/^\s*([-+*])\s$/, bulletListSchema.type(ctx))
+  wrappingInputRule(/^\s*([-+*])\s$/, bulletListSchema.type(ctx), (match) => ({
+    bullet: match[1],
+  }))
 )
 
 withMeta(wrapInBulletListInputRule, {

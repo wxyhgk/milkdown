@@ -25,6 +25,14 @@ export const tableSchema = $nodeSchema('table', () => ({
   ...originalSchema.table,
   content: 'table_header_row table_row+',
   disableDropCursor: true,
+  attrs: {
+    ...originalSchema.table.attrs,
+    /// How the author lined up the pipes: `length` (padded to the same
+    /// column), `width` (padded for CJK display width) or `none`.
+    pipeAlign: { default: '', validate: 'string' },
+    /// The delimiter row as written (`| --- | :---: |`).
+    delimiter: { default: '', validate: 'string' },
+  },
   parseMarkdown: {
     match: (node) => node.type === 'table',
     runner: (state, node, type) => {
@@ -34,7 +42,10 @@ export const tableSchema = $nodeSchema('table', () => ({
         align,
         isHeader: i === 0,
       }))
-      state.openNode(type)
+      state.openNode(type, {
+        pipeAlign: (node.pipeAlign as string | undefined) ?? '',
+        delimiter: (node.delimiter as string | undefined) ?? '',
+      })
       state.next(children)
       state.closeNode()
     },
@@ -49,7 +60,11 @@ export const tableSchema = $nodeSchema('table', () => ({
       firstLine.forEach((cell) => {
         align.push(cell.attrs.alignment)
       })
-      state.openNode('table', undefined, { align })
+      state.openNode('table', undefined, {
+        align,
+        ...(node.attrs.pipeAlign ? { pipeAlign: node.attrs.pipeAlign } : {}),
+        ...(node.attrs.delimiter ? { delimiter: node.attrs.delimiter } : {}),
+      })
       state.next(node.content)
       state.closeNode()
     },

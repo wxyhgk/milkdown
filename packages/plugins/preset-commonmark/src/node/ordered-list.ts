@@ -33,6 +33,16 @@ export const orderedListSchema = $nodeSchema('ordered_list', (ctx) => ({
       default: false,
       validate: 'boolean',
     },
+    /// The delimiter the author wrote (`.` or `)`); empty for the default.
+    delimiter: {
+      default: '',
+      validate: 'string',
+    },
+    /// False when every item was written with the same number (`1. 1. 1.`).
+    increment: {
+      default: true,
+      validate: 'boolean',
+    },
   },
   parseDOM: [
     {
@@ -42,6 +52,8 @@ export const orderedListSchema = $nodeSchema('ordered_list', (ctx) => ({
 
         return {
           spread: dom.dataset.spread === 'true',
+          delimiter: dom.dataset.delimiter ?? '',
+          increment: dom.dataset.increment !== 'false',
           order: dom.hasAttribute('start')
             ? Number(dom.getAttribute('start'))
             : 1,
@@ -55,6 +67,10 @@ export const orderedListSchema = $nodeSchema('ordered_list', (ctx) => ({
       ...ctx.get(orderedListAttr.key)(node),
       ...(node.attrs.order === 1 ? {} : { start: node.attrs.order }),
       'data-spread': node.attrs.spread,
+      ...(node.attrs.delimiter
+        ? { 'data-delimiter': node.attrs.delimiter }
+        : {}),
+      ...(node.attrs.increment ? {} : { 'data-increment': 'false' }),
     },
     0,
   ],
@@ -63,7 +79,12 @@ export const orderedListSchema = $nodeSchema('ordered_list', (ctx) => ({
     runner: (state, node, type) => {
       const spread = node.spread ?? true
       state
-        .openNode(type, { spread, order: node.start ?? 1 })
+        .openNode(type, {
+          spread,
+          order: node.start ?? 1,
+          delimiter: (node.delimiter as string | undefined) ?? '',
+          increment: node.increment !== false,
+        })
         .next(node.children)
         .closeNode()
     },
@@ -75,6 +96,8 @@ export const orderedListSchema = $nodeSchema('ordered_list', (ctx) => ({
         ordered: true,
         start: node.attrs.order ?? 1,
         spread: node.attrs.spread,
+        ...(node.attrs.delimiter ? { delimiter: node.attrs.delimiter } : {}),
+        ...(node.attrs.increment ? {} : { increment: false }),
       })
       state.next(node.content)
       state.closeNode()

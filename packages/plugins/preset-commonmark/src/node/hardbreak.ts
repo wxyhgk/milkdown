@@ -29,6 +29,11 @@ export const hardbreakSchema = $nodeSchema('hardbreak', (ctx) => ({
       default: false,
       validate: 'boolean',
     },
+    /// `spaces` when the author ended the line with two spaces.
+    style: {
+      default: '',
+      validate: 'string',
+    },
   },
   selectable: false,
   parseDOM: [
@@ -49,6 +54,7 @@ export const hardbreakSchema = $nodeSchema('hardbreak', (ctx) => ({
         isInline: Boolean(
           (node.data as undefined | { isInline: boolean })?.isInline
         ),
+        style: (node.style as string | undefined) ?? '',
       })
     },
   },
@@ -57,7 +63,13 @@ export const hardbreakSchema = $nodeSchema('hardbreak', (ctx) => ({
     match: (node) => node.type.name === 'hardbreak',
     runner: (state, node) => {
       if (node.attrs.isInline) state.addNode('text', undefined, '\n')
-      else state.addNode('break')
+      else
+        state.addNode(
+          'break',
+          undefined,
+          undefined,
+          node.attrs.style ? { style: node.attrs.style } : undefined
+        )
     },
   },
 }))

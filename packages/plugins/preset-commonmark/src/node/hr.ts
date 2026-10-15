@@ -16,18 +16,30 @@ withMeta(hrAttr, {
 /// Hr node schema.
 export const hrSchema = $nodeSchema('hr', (ctx) => ({
   group: 'block',
+  attrs: {
+    /// How the author wrote it (`---`, `* * *`); empty for the default.
+    marker: {
+      default: '',
+      validate: 'string',
+    },
+  },
   parseDOM: [{ tag: 'hr' }],
   toDOM: (node) => ['hr', ctx.get(hrAttr.key)(node)],
   parseMarkdown: {
     match: ({ type }) => type === 'thematicBreak',
-    runner: (state, _, type) => {
-      state.addNode(type)
+    runner: (state, node, type) => {
+      state.addNode(type, { marker: (node.marker as string | undefined) ?? '' })
     },
   },
   toMarkdown: {
     match: (node) => node.type.name === 'hr',
-    runner: (state) => {
-      state.addNode('thematicBreak')
+    runner: (state, node) => {
+      state.addNode(
+        'thematicBreak',
+        undefined,
+        undefined,
+        node.attrs.marker ? { marker: node.attrs.marker } : undefined
+      )
     },
   },
 }))
@@ -49,7 +61,12 @@ export const insertHrInputRule = $inputRule(
     new InputRule(/^(?:---|___\s|\*\*\*\s)$/, (state, match, start, end) => {
       const { tr } = state
 
-      if (match[0]) tr.replaceWith(start - 1, end, hrSchema.type(ctx).create())
+      if (match[0])
+        tr.replaceWith(
+          start - 1,
+          end,
+          hrSchema.type(ctx).create({ marker: match[0].trim() })
+        )
 
       return tr
     })

@@ -21,6 +21,8 @@ export const linkSchema = $markSchema('link', (ctx) => ({
   attrs: {
     href: { validate: 'string' },
     title: { default: null, validate: 'string|null' },
+    /// True when the author wrote the bare address, which GFM made a link.
+    literal: { default: false, validate: 'boolean' },
   },
   parseDOM: [
     {
@@ -50,7 +52,11 @@ export const linkSchema = $markSchema('link', (ctx) => ({
     runner: (state, node, markType) => {
       const url = node.url as string
       const title = node.title as string
-      state.openMark(markType, { href: url, title })
+      state.openMark(markType, {
+        href: url,
+        title,
+        literal: Boolean(node.literal),
+      })
       state.next(node.children)
       state.closeMark(markType)
     },
@@ -61,6 +67,7 @@ export const linkSchema = $markSchema('link', (ctx) => ({
       state.withMark(mark, 'link', undefined, {
         title: mark.attrs.title,
         url: mark.attrs.href,
+        ...(mark.attrs.literal ? { literal: true } : {}),
       })
     },
   },

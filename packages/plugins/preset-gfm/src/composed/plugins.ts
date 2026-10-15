@@ -4,6 +4,7 @@ import {
   autoInsertSpanPlugin,
   keepTableAlignPlugin,
   remarkGFMPlugin,
+  remarkPreserveTable,
   tableEditingPlugin,
 } from '../plugin'
 
@@ -12,5 +13,6 @@ export const plugins: MilkdownPlugin[] = [
   keepTableAlignPlugin,
   autoInsertSpanPlugin,
   remarkGFMPlugin,
+  remarkPreserveTable,
   tableEditingPlugin,
 ].flat()

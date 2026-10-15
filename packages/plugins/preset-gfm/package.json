@@ -46,6 +46,8 @@
     "@milkdown/prose": "workspace:*",
     "@milkdown/transformer": "workspace:*",
     "@milkdown/utils": "workspace:*",
+    "mdast-util-gfm-table": "^2.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
     "prosemirror-safari-ime-span": "^1.0.1",
     "remark-gfm": "^4.0.1"
   }

@@ -119,8 +119,7 @@ describe('typing underscore emphasis still works', () => {
     )
 
     expect(hasEmphasis(editor)).toBe(false)
-    expect(editor.action(getMarkdown())).toBe(
-      'the\\_lunatic\\_is\\_on\\_the\\_grass\n'
-    )
+    // Underscores inside a word cannot start emphasis, so none is escaped.
+    expect(editor.action(getMarkdown())).toBe('the_lunatic_is_on_the_grass\n')
   })
 })

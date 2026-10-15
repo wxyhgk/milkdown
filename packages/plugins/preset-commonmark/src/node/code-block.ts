@@ -36,6 +36,16 @@ export const codeBlockSchema = $nodeSchema('code_block', (ctx) => {
         default: '',
         validate: 'string',
       },
+      /// What follows the language on the fence line (`title="a.py"`).
+      meta: {
+        default: '',
+        validate: 'string',
+      },
+      /// How the author fenced it: `` ` ``, `~`, or `indent`; empty for the default.
+      fence: {
+        default: '',
+        validate: 'string',
+      },
     },
     parseDOM: [
       {
@@ -70,7 +80,11 @@ export const codeBlockSchema = $nodeSchema('code_block', (ctx) => {
       runner: (state, node, type) => {
         const language = node.lang ?? ''
         const value = node.value as string | null
-        state.openNode(type, { language })
+        state.openNode(type, {
+          language,
+          meta: (node.meta as string | null) ?? '',
+          fence: (node.fence as string | undefined) ?? '',
+        })
         if (value) state.addText(value)
 
         state.closeNode()
@@ -81,6 +95,8 @@ export const codeBlockSchema = $nodeSchema('code_block', (ctx) => {
       runner: (state, node) => {
         state.addNode('code', undefined, node.content.firstChild?.text || '', {
           lang: node.attrs.language,
+          ...(node.attrs.meta ? { meta: node.attrs.meta } : {}),
+          ...(node.attrs.fence ? { fence: node.attrs.fence } : {}),
         })
       },
     },
