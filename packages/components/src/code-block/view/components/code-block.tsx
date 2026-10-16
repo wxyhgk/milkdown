@@ -29,6 +29,7 @@ export type CodeBlockProps = {
   getReadOnly: () => boolean
   codemirror: CodeMirror
   language: Ref<string>
+  meta: Ref<string>
   getAllLanguages: () => Array<LanguageInfo>
   setLanguage: (language: string) => void
   config: Omit<CodeBlockConfig, 'languages' | 'extensions'>
@@ -53,6 +54,10 @@ export const CodeBlock = defineComponent<CodeBlockProps>({
       required: true,
     },
     language: {
+      type: Object,
+      required: true,
+    },
+    meta: {
       type: Object,
       required: true,
     },
@@ -87,12 +92,13 @@ export const CodeBlock = defineComponent<CodeBlockProps>({
     })
 
     watch(
-      () => [props.text.value, props.language.value],
+      () => [props.text.value, props.language.value, props.meta.value],
       () => {
         const result = props.config.renderPreview(
           props.language.value,
           props.text.value,
-          (value) => (preview.value = value)
+          (value) => (preview.value = value),
+          props.meta.value
         )
         if (result) {
           preview.value = result

@@ -20,7 +20,9 @@ export interface CodeBlockConfig {
   renderPreview: (
     language: string,
     content: string,
-    applyPreview: (value: null | string | HTMLElement) => void
+    applyPreview: (value: null | string | HTMLElement) => void,
+    /// What follows the language on the fence line (`title="a.py"`).
+    meta: string
   ) => void | null | string | HTMLElement
   previewToggleButton: (previewOnlyMode: boolean) => string
   previewLabel: string

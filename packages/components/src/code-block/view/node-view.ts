@@ -52,6 +52,8 @@ export class CodeMirrorBlock implements NodeView {
 
   selected = ref(false)
   language = ref('')
+  /// What follows the language on the fence line, for the preview.
+  meta = ref('')
   text = ref('')
 
   private initialized = false
@@ -75,6 +77,7 @@ export class CodeMirrorBlock implements NodeView {
 
     this.text.value = this.node.textContent
     this.language.value = this.node.attrs.language ?? ''
+    this.meta.value = this.node.attrs.meta ?? ''
 
     this.dom = document.createElement('div')
     this.dom.className = 'milkdown-code-block'
@@ -202,6 +205,7 @@ export class CodeMirrorBlock implements NodeView {
       selected: this.selected,
       codemirror: this.cm,
       language: this.language,
+      meta: this.meta,
       getAllLanguages: this.getAllLanguages,
       getReadOnly: () => !this.view.editable,
       setLanguage: this.setLanguage,
@@ -319,6 +323,7 @@ export class CodeMirrorBlock implements NodeView {
     this.node = node
     this.text.value = node.textContent
     this.language.value = node.attrs.language ?? ''
+    this.meta.value = node.attrs.meta ?? ''
 
     if (!this.initialized) {
       // Update the placeholder text
