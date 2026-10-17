@@ -125,6 +125,7 @@ export type BlockEditFeatureConfig = DeepPartial<BlockEditConfig>
 export { blockMenuAPI } from './block-menu'
 export type {
   BlockMenuItem,
+  BlockMenuPlacement,
   BlockMenuTarget,
   BuildBlockMenu,
 } from './block-menu'

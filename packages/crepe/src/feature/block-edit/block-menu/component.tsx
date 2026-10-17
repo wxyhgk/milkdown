@@ -83,6 +83,7 @@ export const BlockMenu = defineComponent<BlockMenuProps>({
                 >
                   {item.icon ? <Icon icon={item.icon} /> : null}
                   <span>{item.label}</span>
+                  {item.hint ? <kbd class="hint">{item.hint}</kbd> : null}
                 </li>
               ))}
             </ul>

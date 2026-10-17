@@ -6,7 +6,7 @@ import type { BlockEditFeatureConfig } from '.'
 
 import { Crepe } from '../../core'
 import { CrepeFeature } from '../index'
-import { blockMenuAPI } from './block-menu'
+import { blockMenuAPI, type BlockMenuPlacement } from './block-menu'
 
 async function createCrepe(blockEdit: BlockEditFeatureConfig) {
   const root = document.createElement('div')
@@ -42,6 +42,7 @@ describe('block menu', () => {
         builder.addGroup('actions', '').addItem('delete', {
           label: 'Delete',
           danger: true,
+          hint: 'Del',
         })
       },
     })
@@ -54,6 +55,8 @@ describe('block menu', () => {
     expect(menu().querySelector('h6')).toHaveTextContent('Turn into')
     expect(menu().querySelector('[data-key="heading"]')).toHaveClass('current')
     expect(menu().querySelector('[data-key="delete"]')).toHaveClass('danger')
+    expect(menu().querySelector('[data-key="delete"] .hint')).toHaveTextContent('Del')
+    expect(menu().querySelector('[data-key="heading"] .hint')).toBeNull()
 
     open(second)
     expect(menu().dataset.show).toBe('false')
@@ -90,5 +93,28 @@ describe('block menu', () => {
     const empty = await createCrepe({ buildBlockMenu: () => {} })
     empty.open(0)
     expect(empty.menu().dataset.show).toBe('false')
+  })
+
+  test('opens beside its anchor, or below it as a dropdown', async () => {
+    const { crepe, menu } = await createCrepe({
+      buildBlockMenu: (builder) => {
+        builder.addGroup('actions', '').addItem('delete', { label: 'Delete' })
+      },
+    })
+    const ctx = crepe.editor.ctx
+    const rect = (left: number, top: number, width: number, height: number) =>
+      ({ left, top, width, height, right: left + width, bottom: top + height, x: left, y: top, toJSON: () => ({}) }) as DOMRect
+    const anchor = document.createElement('button')
+    anchor.getBoundingClientRect = () => rect(100, 200, 40, 30)
+    menu().getBoundingClientRect = () => rect(0, 0, 180, 100)
+    const placed = async (placement?: BlockMenuPlacement) => {
+      ctx.get(blockMenuAPI.key).toggle(1, anchor, placement)
+      await new Promise((resolve) => setTimeout(resolve))
+      const at = [menu().style.left, menu().style.top]
+      ctx.get(blockMenuAPI.key).hide()
+      return at
+    }
+    expect(await placed()).toEqual(['148px', '200px'])
+    expect(await placed('below')).toEqual(['100px', '234px'])
   })
 })

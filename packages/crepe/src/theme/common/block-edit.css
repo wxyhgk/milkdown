@@ -203,6 +203,14 @@
         color: var(--crepe-color-primary);
       }
 
+      .hint {
+        margin-left: auto;
+        padding-left: 16px;
+        color: var(--crepe-color-outline);
+        font: inherit;
+        font-size: 0.857em;
+      }
+
       svg {
         width: 20px;
         height: 20px;

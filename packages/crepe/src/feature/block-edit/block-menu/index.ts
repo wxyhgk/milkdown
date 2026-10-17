@@ -24,6 +24,8 @@ export type BlockMenuItem = {
   current?: boolean
   /// Marks an entry that removes something.
   danger?: boolean
+  /// The key that does the same, shown at the entry's end: `⌘D`.
+  hint?: string
 }
 
 /// The block a menu is open for.
@@ -45,10 +47,18 @@ export const blockMenuConfig = $ctx<
   'blockMenuConfigCtx'
 >({ build: null }, 'blockMenuConfigCtx')
 
+/// Where the menu opens: beside its anchor (a drag handle), or below it (a
+/// button in a bar), as a dropdown.
+export type BlockMenuPlacement = 'beside' | 'below'
+
 interface BlockMenuAPI {
   /// Opens the menu for the block at `pos`, next to `anchor`, selecting the block;
   /// or closes it when it is open there already.
-  toggle: (pos: number, anchor: HTMLElement) => void
+  toggle: (
+    pos: number,
+    anchor: HTMLElement,
+    placement?: BlockMenuPlacement
+  ) => void
   hide: () => void
 }
 
@@ -137,7 +147,11 @@ class BlockMenuView implements PluginView {
       this.hide()
   }
 
-  toggle = (pos: number, anchor: HTMLElement) => {
+  toggle = (
+    pos: number,
+    anchor: HTMLElement,
+    placement: BlockMenuPlacement = 'beside'
+  ) => {
     if (this.#target?.pos === pos) {
       this.hide()
       return
@@ -170,7 +184,7 @@ class BlockMenuView implements PluginView {
     this.#content.dataset.show = 'true'
     // Measured once Vue has drawn the entries.
     void nextTick(() => {
-      if (this.#anchor === anchor) this.#place(anchor)
+      if (this.#anchor === anchor) this.#place(anchor, placement)
     })
     // Focus moves into the menu, as in any menu. While the editor kept it, the
     // browser's late report of an earlier caret could move the selection off
@@ -194,9 +208,10 @@ class BlockMenuView implements PluginView {
     this.#content.remove()
   }
 
-  /// Beside the anchor, on whichever side fits, inside what can be seen of
-  /// the editor: the window, less any scrolling or clipping box it sits in.
-  #place(anchor: HTMLElement) {
+  /// Beside the anchor, on whichever side fits (or below it, else above),
+  /// inside what can be seen of the editor: the window, less any scrolling or
+  /// clipping box it sits in.
+  #place(anchor: HTMLElement, placement: BlockMenuPlacement) {
     const rect = anchor.getBoundingClientRect()
     const style = this.#content.style
     style.left = '0px'
@@ -206,12 +221,17 @@ class BlockMenuView implements PluginView {
     const { width, height } = origin
     const bounds = visibleBounds(this.#content)
     let left = rect.right + 8
-    if (left + width > bounds.right - 8) left = rect.left - width - 8
+    let top = rect.top
+    if (placement === 'below') {
+      left = rect.left
+      top = rect.bottom + 4
+      if (top + height > bounds.bottom - 8 && rect.top - height - 4 >= bounds.top + 8)
+        top = rect.top - height - 4
+    } else if (left + width > bounds.right - 8) {
+      left = rect.left - width - 8
+    }
     left = Math.max(bounds.left + 8, Math.min(left, bounds.right - width - 8))
-    const top = Math.max(
-      bounds.top + 8,
-      Math.min(rect.top, bounds.bottom - height - 8)
-    )
+    top = Math.max(bounds.top + 8, Math.min(top, bounds.bottom - height - 8))
     style.left = `${left - origin.left}px`
     style.top = `${top - origin.top}px`
   }
