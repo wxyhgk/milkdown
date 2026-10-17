@@ -2,7 +2,6 @@ import type { Node } from '@milkdown/prose/model'
 import type { NodeViewConstructor } from '@milkdown/prose/view'
 
 import { listItemSchema } from '@milkdown/preset-commonmark'
-import { TextSelection } from '@milkdown/prose/state'
 import { $view } from '@milkdown/utils'
 import { createApp, ref, watchEffect } from 'vue'
 
@@ -46,21 +45,16 @@ export const listItemBlockView = $view(
       })
       let raf = 0
       const onMount = (div: HTMLElement) => {
-        const { anchor, head } = view.state.selection
         div.appendChild(contentDOM)
-        // put the cursor to the new created list item
+        // Moving the content in loses the cursor: draw the editor's selection
+        // again, as it is by then. Not as it was at mount: what was typed in
+        // the meantime moved it on, and putting it back would send the next
+        // keys to where the item started.
         raf = requestAnimationFrame(() => {
           raf = 0
           if (view.isDestroyed) return
           const { state } = view
-          const docSize = state.doc.content.size
-          if (anchor > docSize || head > docSize) return
-          const anchorPos = state.doc.resolve(anchor)
-          const headPos = state.doc.resolve(head)
-          // Use `between` so we fall back to the nearest valid selection when
-          // the resolved positions no longer sit inside a textblock.
-          const selection = TextSelection.between(anchorPos, headPos)
-          view.dispatch(state.tr.setSelection(selection))
+          view.dispatch(state.tr.setSelection(state.selection))
         })
       }
 
