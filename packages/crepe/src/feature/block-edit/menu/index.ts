@@ -70,8 +70,14 @@ class MenuView implements PluginView {
     this.#content = content
     // oxlint-disable-next-line ts/no-this-alias
     const self = this
-    const slashMenuOptions = (config?.slashMenu ??
-      {}) as Partial<SlashProviderOptions>
+    const slashMenuOptions = (config?.slashMenu ?? {}) as Partial<
+      SlashProviderOptions & { triggers: string[] }
+    >
+    const triggers = slashMenuOptions.triggers?.length
+      ? slashMenuOptions.triggers
+      : ['/']
+    const trigger = (text: string) =>
+      triggers.find((candidate) => text.startsWith(candidate))
     this.#slashProvider = new SlashProvider({
       content: this.#content,
       debounce: 20,
@@ -94,9 +100,8 @@ class MenuView implements PluginView {
 
         const pos = self.#programmaticallyPos
 
-        filter.value = currentText.startsWith('/')
-          ? currentText.slice(1)
-          : currentText
+        const typed = trigger(currentText)
+        filter.value = typed ? currentText.slice(typed.length) : currentText
 
         if (typeof pos === 'number') {
           const maxSize = view.state.doc.nodeSize - 2
@@ -113,7 +118,7 @@ class MenuView implements PluginView {
           return true
         }
 
-        if (!currentText.startsWith('/')) return false
+        if (!typed) return false
 
         return true
       },

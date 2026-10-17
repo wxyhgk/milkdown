@@ -20,7 +20,7 @@ import {
 import { createTable } from '@milkdown/kit/preset/gfm'
 
 import type { BlockEditFeatureConfig } from '../index'
-import type { SlashMenuItem } from './utils'
+import { matchesFilter, type SlashMenuItem } from './utils'
 
 import { useCrepeFeatures } from '../../../core/slice'
 import { CrepeFeature } from '../../../feature'
@@ -366,7 +366,7 @@ export function getGroups(
     groups = groups
       .map((group) => {
         const items = group.items.filter((item) =>
-          item.label.toLowerCase().includes(filter.toLowerCase())
+          matchesFilter(item, filter)
         )
 
         return {

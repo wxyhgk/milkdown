@@ -98,6 +98,8 @@ export const Menu = defineComponent<MenuProps>({
     }
 
     const onKeydown = (e: KeyboardEvent) => {
+      // Keys that pick a word in an input method are the input method's.
+      if (e.isComposing) return
       const { size, groups } = groupInfo.value
       if (e.key === 'Escape') {
         e.preventDefault()

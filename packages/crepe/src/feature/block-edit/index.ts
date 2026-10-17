@@ -37,7 +37,11 @@ interface BlockEditConfig {
   slashMenu: Pick<
     SlashProviderOptions,
     'root' | 'offset' | 'middleware' | 'floatingUIOptions'
-  >
+  > & {
+    /// What, typed at the start of a block, opens the menu; `/` by default.
+    /// A Chinese input method types `、` for the `/` key.
+    triggers: string[]
+  }
 
   textGroup: {
     label: string
